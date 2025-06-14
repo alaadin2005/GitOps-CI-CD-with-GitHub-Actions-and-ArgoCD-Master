@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: my-app-container
-        image: 3booda24/myapp1
+        image: alaadin2005/mynodejs:v1
         ports:
         - containerPort: 3000
         imagePullPolicy: Always
