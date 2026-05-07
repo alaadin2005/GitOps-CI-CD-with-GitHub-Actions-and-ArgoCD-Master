@@ -1,35 +1,35 @@
-name: Build & Push All Services
+name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        service: [app]
-
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout source code
+      uses: actions/checkout@v4
 
-      - name: Login DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
 
-      - name: Build & Push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./Docker-files/${{ matrix.service }}
-          push: true
-          tags: |
-            ${{ env.DOCKERHUB_USERNAME }}/vprofile-${{ matrix.service }}:latest
-            ${{ env.DOCKERHUB_USERNAME }}/vprofile-${{ matrix.service }}:${{ github.sha }}
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build Docker image
+      run: docker build -t my-node-app .
+
+    - name: Verify Docker image
+      run: docker images
